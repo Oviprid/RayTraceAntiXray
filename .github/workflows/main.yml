@@ -1,0 +1,38 @@
+name: Build Plugin JAR
+
+# Когда запускать сборку
+on:
+  workflow_dispatch: # Позволяет запускать сборку вручную с кнопки
+  push:
+    branches: [ "master", "main" ] # Или можно настроить на пуш в главную ветку
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Используем последнюю версию Ubuntu
+
+    steps:
+      # 1. Скачиваем код из репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем JDK 21 (самая актуальная для новых версий майнкрафта)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin' # Популярная сборка OpenJDK
+
+      # 3. Даем права на выполнение gradlew (важно для Linux)
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      # 4. Собираем проект (команда build)
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      # 5. Загружаем результат сборки (JAR файл)
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Plugin-JAR # Название папки с артефактом
+          path: build/libs/*.jar # Путь, где лежат все JAR файлы после сборки Gradle
